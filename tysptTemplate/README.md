@@ -81,9 +81,11 @@ Le fichier `main.typ` définit les éléments suivants :
    Permet d'assurer une séparation claire entre la couverture et le contenu du rapport.
 
 ## Utilisation
-1. Installer Typst si ce n'est pas déjà fait.
-2. Ouvrir le fichier `main.typ` avec un éditeur Typst.
-3. Compiler le document pour générer le rapport.
+1. **Connectez-vous à votre compte [Typst](https://typst.app/).**
+2. **Créez un document vide**, le fichier `main.typ` sera créé automatiquement.
+3. **Importez le logo dans votre projet** en l'ajoutant via l'interface de Typst.
+4. **Ouvrez le fichier `main.typ`** avec l'éditeur Typst intégré sur le site.
+5. **Ajoutez simplement le template** dans le fichier pour personnaliser votre projet.
 
 ## Auteurs
 - Clément Aldebert ([clement.aldebert31@gmail.com](mailto:clement.aldebert31@gmail.com))
