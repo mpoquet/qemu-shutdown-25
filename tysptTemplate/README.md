@@ -1,95 +1,87 @@
-# README - Template Typst IRIT
+# Guide d'utilisation du template `iritTemplateFunction.typ`
 
-## Description
-Ce projet contient un template Typst pour la rédaction de rapports à l'Institut de Recherche en Informatique de Toulouse (IRIT). Il est basé sur le template LaTeX réalisé par M. Poquet pour l'IRIT, présent dans le projet QEMU disponible sur GitLab : [irit-latex-pandoc-template](https://gitlab.irit.fr/poquet/irit-latex-pandoc-template.git). Ce template permet de structurer un document avec une mise en page spécifique intégrant le logo de l'IRIT et une présentation des auteurs.
+Ce document explique comment utiliser le template `iritTemplateFunction.typ` pour générer un document avec une mise en page standardisée.
 
-## Structure du projet
-Le projet est composé des fichiers suivants :
+## 1. Présentation du Template
 
-- **`irit-logo.svg`** : Le logo officiel de l'IRIT qui sera affiché sur la page de titre.
-- **`main.typ`** : Le fichier principal contenant la structure du document et le texte.
+Le template permet de structurer un document en définissant :
+- Les couleurs principales (bleu et orange IRIT)
+- Les auteurs et leur affichage en pied de page
+- Une en-tête avec logo et description
+- Un titre principal et un sous-titre
+- Une mise en page justifiée
+- Des sections numérotées avec des niveaux de titres
+- Une table des matières
 
-## Explication du template
+## 2. Utilisation
 
-Le fichier `main.typ` définit les éléments suivants :
+### 2.1. Importation du template
 
-1. **Définition des couleurs**
-   ```typst
-   #let blue-irit = rgb(0, 86, 112)
-   #let orange-irit = rgb(255, 76, 0)
-   ```
-   Ces variables définissent les couleurs officielles de l'IRIT utilisées dans le document.
+Dans votre fichier `.typ`, commencez par importer le template :
 
-2. **Configuration du texte**
-   ```typst
-   #set text(lang: "fr", font: "New Computer Modern Sans", size: 12pt)
-   ```
-   Cette ligne configure la langue, la police et la taille du texte.
+```typst
+#import "iritTemplateFunction.typ": *
+```
 
-3. **Disposition du logo et des informations des auteurs**
-   ```typst
-   #grid(columns: (25%, 60%),
-     gutter: 5em,
-     align: horizon,
-     grid.cell(image("irit-logo.svg")),
-     grid.cell(
-       text()[
-           *#text(fill: blue-irit, "Institut de Recherche en Informatique de Toulouse")* \
-           Aldebert Clément et Polzin Laurent\
-           Étudiants à l'université Paul Sabatier \
-           Université Paul Sabatier, IRIT \
-           118 Route de Narbonne, 31062 Toulouse Codex 9, France \
-           *#text(fill: orange-irit, "clement.aldebert31@gmail.com")*
-           *#text(fill: orange-irit, "laurentpolzin@gmail.com")*
-         ])
-   )
-   ```
-   Cette section crée une grille avec deux colonnes : l'une contenant le logo et l'autre contenant les informations des auteurs.
+### 2.2. Définition des variables
 
-4. **Ajout d'une ligne décorative**
-   ```typst
-   #align(top + center)[
-     #line(length: 120%)
-   ]
-   ```
-   Cette ligne horizontale permet de séparer la section des auteurs du reste du document.
+Définissez les variables principales, notamment les auteurs et la description de l'en-tête :
 
-5. **Titre et sous-titre**
-   ```typst
-   #align(center)[
-     = #text(fill: blue-irit,"Title")
-     
-     === #text(fill: blue-irit, "Sub-title")
-   ]
-   ```
-   Cette section centre et stylise le titre et le sous-titre en utilisant la couleur de l'IRIT.
+```typst
+#let auteur = ("clement.aldebert31@gmail.com", "laurentpolzin@gmail.com")
+#let description = "Aldebert Clément et Polzin Laurent\nÉtudiants à l'université Paul Sabatier"
+```
 
-6. **Pied de page**
-   ```typst
-   #align(bottom)[
-     #line(length: 100%, stroke: orange-irit)
-     #text(orange-irit)[clement.aldebert31\@gmail.com]
-     #text(orange-irit)[laurentpolzin\@gmail.com]
-   ]
-   ```
-   Cette partie ajoute une ligne colorée et affiche les adresses e-mail des auteurs en bas de la page.
+### 2.3. Initialisation du document
 
-7. **Saut de page**
-   ```typst
-   #pagebreak()
-   ```
-   Permet d'assurer une séparation claire entre la couverture et le contenu du rapport.
+Appelez la fonction `project.with` pour initialiser le document avec ses paramètres :
 
-## Utilisation
-1. Installer Typst si ce n'est pas déjà fait.
-2. Ouvrir le fichier `main.typ` avec un éditeur Typst.
-3. Compiler le document pour générer le rapport.
+```typst
+#show: project.with(
+  title: "Rapport",
+  subtitle: "Sous-titre",
+  authors: auteur,
+  description : description
+)
+```
 
-## Auteurs
-- Clément Aldebert ([clement.aldebert31@gmail.com](mailto:clement.aldebert31@gmail.com))
-- Laurent Polzin ([laurentpolzin@gmail.com](mailto:laurentpolzin@gmail.com))
+### 2.4. Ajout d'une table des matières
 
----
-Ce template est conçu pour simplifier la création de rapports académiques avec une mise en page professionnelle et institutionnelle, en reprenant l'esthétique du template LaTeX de M. Poquet.
+Pour générer une table des matières automatique :
 
+```typst
+#outline()
+```
+
+### 2.5. Saut de page
+
+Ajoutez un saut de page si nécessaire :
+
+```typst
+#pagebreak()
+```
+
+### 2.6. Création de sections
+
+Utilisez la fonction `titre` pour créer des sections avec différents niveaux :
+
+```typst
+#titre("Titre de niveau 1", 1) \
+#lorem(600)
+
+#titre("Titre de niveau 2", 2) \
+#lorem(600)
+
+#titre("Titre de niveau 3", 3) \
+#lorem(600)
+
+#titre("Titre de niveau 4", 4) \
+#lorem(600)
+```
+
+## 3. Résumé
+
+En suivant ces étapes, vous pouvez générer un document bien structuré avec une mise en page cohérente et un formatage standardisé. Ce template permet une personnalisation facile des titres, auteurs, descriptions et contenus.
+
+N'hésitez pas à adapter et enrichir le modèle selon vos besoins !
 
