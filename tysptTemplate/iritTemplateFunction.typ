@@ -4,7 +4,7 @@
 #let project(title: "", subtitle: "", authors: (), description: (), body) = {
   // Paramètres globaux
   set text(lang: "fr", font: "New Computer Modern Sans", size: 12pt)
-  set heading(numbering: "I")
+  set heading(numbering: "I - 1")
   set page(
     footer: context [
       #line(length: 100%, stroke: orange-irit)
