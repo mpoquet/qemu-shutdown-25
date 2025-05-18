@@ -1,0 +1,5 @@
+Ce code initialise un système multiprocesseur sur Raspberry Pi 3 b en utilisant une table partagée d'adresses d’entrée pour réveiller les cœurs secondaires. Seul le cœur 0 entre dans `kernel_main`, où il initialise l’UART et réveille les autres cœurs avec `wake_up_core()`, chacun recevant l'adresse `second_startup`. Chaque cœur secondaire configure son timer virtuel, active les interruptions, et entre dans une boucle d’attente (WFI). Ce mécanisme permet une gestion indépendante du timer sur chaque cœur, tout en partageant un point d'entrée flexible via une table mémoire.
+
+Le bug que l'on rencontre, ou du moins si ce n'est pas une mauvais interprétation de notre part, est que les cœurs secondaire se diriges une fois le br x4 effectuer sur un registre udf et fini de se bloqué sur le registre 0x200 (udf aussi).
+
+Ce souci à était rencontrer plusieurs fois. En outre nous avons peu comprendre que ce sous ci surviens quand on met une adresse avec wake_up_core vers du code assembleur, ou que nous essayons de le faire directement depuis de l'assembleur.
