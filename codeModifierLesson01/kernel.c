@@ -1,7 +1,7 @@
 #include "mini_uart.h"
 #include <stdint.h>
 
-#define CORE_ENTRY_POINT_ADDR 0x00000000D8  // Adresse de la table des points d'entrée des cores secondaires
+#define CORE_ENTRY_POINT_ADDR 0x40000000D8  // Adresse de la table des points d'entrée des cores secondaires
 
 extern void second_startup(void);
 
