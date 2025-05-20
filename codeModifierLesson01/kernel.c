@@ -25,11 +25,7 @@ void kernel_main(void)
 }
 
 void second_startup(void) {
-    // Code pour les cores secondaires (tous les cores autres que le 0)
-    // Initialiser la pile (si nécessaire)
-    // Boucle d'attente
     while (1) {
-        __asm__ volatile ("wfi");  // Attendre un événement
-				   //
+        __asm__ volatile ("wfi");
     }
 }
