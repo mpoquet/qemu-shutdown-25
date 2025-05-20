@@ -8,7 +8,6 @@ extern void second_startup(void);
 void wake_up_core(int core_id, void (*entry_point)(void)) {
     volatile uint64_t *core_entry_point_table = (volatile uint64_t *)CORE_ENTRY_POINT_ADDR;
     core_entry_point_table[core_id] = (uint64_t)entry_point;
-    __asm__ volatile ("sev");
 }
 
 void kernel_main(void)
