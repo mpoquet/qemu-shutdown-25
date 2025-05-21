@@ -25,5 +25,5 @@ void kernel_main(void)
 }
 
 void second_startup(void) {
-	__asm__ volatile ("wfi");
+    while(1) __asm__ volatile ("wfi");
 }
