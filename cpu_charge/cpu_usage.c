@@ -9,6 +9,7 @@
 #include <math.h>
 #include <sys/wait.h>
 
+int pipefd[2];
 
 // permet de lancer séparer une commande afin de la lancer grace a execv
 char **split_command(char *command);
@@ -24,7 +25,7 @@ void read_write_task_clock(char *in, char *out);
     qemu-path : ou se trouve l'executable de qemu (eventuellement)
     kernel_path : ou trouver le kernel (normalement dans le dossier actuel)
     out : ou ecrire les données recueillies
-    inter : mesures toutes les cycles milisecondes
+    inter : mesures toutes les _inter_ milisecondes
 */
 void launch_qemu(char *kernel_path, char *qemu_path, char *out, int inter) {
     char qemu_comm[1024];
@@ -32,7 +33,7 @@ void launch_qemu(char *kernel_path, char *qemu_path, char *out, int inter) {
     char perf_stat_comm[512];
     sprintf(perf_stat_comm, "perf stat -I %d -o %s", inter, out);
 
-    const char *base_cmd = "%s %s";
+    const char *base_cmd = "%s %s"; // merge perf stat and qemu
     size_t needed = snprintf(NULL, 0, base_cmd, perf_stat_comm, qemu_comm) + 1;
 
     char *command_qemu = malloc(needed);
@@ -43,13 +44,19 @@ void launch_qemu(char *kernel_path, char *qemu_path, char *out, int inter) {
     sprintf(command_qemu, base_cmd, perf_stat_comm, qemu_comm); // perf stat qemu ...
 
     char **splitted = split_command(command_qemu);
-    //chdir(qemu_path);
-    execvp(splitted[0], splitted);
+
+    write(pipefd[1], "1", 1);
+    close(pipefd[1]); 
+    // etre sur que le pere ne me tue pas avant d'avoir mesuré jusqu'au bout
+    // perf stat -p fonctionnait moins bien que perf stat ./qemu
+
+    chdir(qemu_path);
+    execvp(splitted[0], splitted); // new terminal
 }
 
 /*
     a function that splits strings into single words
-    in order to call execvp
+    in order to call execv commands such as execvp
 */
 char **split_command(char *command) {
     char *copy = strdup(command);
@@ -91,13 +98,14 @@ void mesure_qemu(int temps, int intervalTps, char *out_file, char *kernel_path) 
 
     pid_t pid;
     if ((pid = fork()) == 0) {
+        close(pipefd[0]);
         if (setsid() == -1) { // nouvelle session pour tuer perf stat et qemu
             perror("setsid a échoué");
             exit(1);
         }
         prctl(PR_SET_PDEATHSIG, SIGKILL); // permet de tuer a la fois ce fils et qemu
 
-        launch_qemu(kernel_path, qemu_path, out_file, intervalTps);
+        launch_qemu(kernel_path, qemu_path, out_file, intervalTps); // fils lance qemu
 
         perror("execvp a échoué");
         exit(1);
@@ -105,6 +113,11 @@ void mesure_qemu(int temps, int intervalTps, char *out_file, char *kernel_path) 
     // le pere qui mesure le fils ne marchait pas si bien
     // desormais : le fils lance perf stat sur lui meme et le pere attend
     //mesure(temps, intervalTps, pid, out_file);
+    close(pipefd[1]);
+    char buf;
+    read(pipefd[0], &buf, 1); // attend de recevoir un "go"("1" ici) du fils
+    close(pipefd[0]);   
+
     sleep(temps + 1);
     kill(-pid, SIGKILL); // tue tout le groupe du fils (afin de tuer qemu créé par perf stat)
     waitpid(pid, NULL, 0);
@@ -149,7 +162,8 @@ void read_write_task_clock(char *in, char *out) {
                     f = contract_int_str(values[1], strings[0]) / 100;
                 else // cas de 300.36
                     f = values[1] / 100; // / 100 pour avoir un %
-                sprintf(cpu_prc, "%f ", f);
+                    
+                sprintf(cpu_prc, "%f ", f); // writes the result
                 fwrite(cpu_prc, sizeof(char), strlen(cpu_prc), fout);
             }
         }
@@ -161,6 +175,8 @@ void read_write_task_clock(char *in, char *out) {
 /*
     Gets a float array from a transformed file
     return the lengths of the array by the ptr leng
+    
+    returns the read float array
 */
 float *tab_from_datas(char *in_file, int *leng) {
     FILE *fin = fopen(in_file, "r");
@@ -232,8 +248,8 @@ void mesureEtTransforme(int tps, int inter, int nb_lancement, char *cwd) {
         //cree des noms de fichiers
         sprintf(name_total_wfi, "%swfi%d.data", dossier, i);
         sprintf(name_total_wfe, "%swfe%d.data", dossier, i);
-        sprintf(name_wfi_filtered_task_clock, "%swfi%d_filtered.data", dossier, i);
-        sprintf(name_wfe_filtered_task_clock, "%swfe%d_filtered.data", dossier, i);
+        sprintf(name_wfi_filtered_task_clock, "%s%dwfi_filtered.data", dossier, i);
+        sprintf(name_wfe_filtered_task_clock, "%s%dwfe_filtered.data", dossier, i);
 
         // wfi
         mesure_qemu(tps, inter, name_total_wfi, wfi_kernel_path); // mesure enfin le temps
@@ -254,9 +270,9 @@ void mesureEtTransforme(int tps, int inter, int nb_lancement, char *cwd) {
 }
 
 /// @brief lit les fichiers filtrés who (wfi ou wfe) et en fait une moyenne
-/// @param who wfi ou wfe
+/// @param who : wfi ou wfe
 /// @param nb_lancement
-/// @param datas_path le pwd pour savoir ou trouver le dossier cpu_datas
+/// @param datas_path : le pwd pour savoir ou trouver le dossier cpu_datas
 void moyenne_datas(char *who, int nb_lancement, char *datas_path) {
     int leng = 0;
     int leng_max = 0;
@@ -268,7 +284,7 @@ void moyenne_datas(char *who, int nb_lancement, char *datas_path) {
     float **tabs = malloc(sizeof(float *) * nb_lancement);
 
     for (int i = 0 ; i < nb_lancement ; ++i) {
-        sprintf(name_filtered_task_clock, "%s/cpu_datas/%s%d_filtered.data", datas_path, who, i);
+        sprintf(name_filtered_task_clock, "%s/cpu_datas/%d%s_filtered.data", datas_path, i, who);
         tabs[i] = tab_from_datas(name_filtered_task_clock, &leng);
         lengths[i] = leng;
 
@@ -357,21 +373,25 @@ int main(int argc, char *argv[]) {
     // cela me permet d'avoir une donnée toutes les 100 milisecondes
     // autrement dit, 10 données par secondes
     // laissons tourner ce programme 10 secondes et nous obtiendrons 100 données.
+    pipe(pipefd); // communication entre pere et fils pour synchronisation de la mesure
     
     char cwd[1024];
     getcwd(cwd, sizeof(cwd));
 
     mesureEtTransforme(tps, inter, nb_lancement, cwd);
 
+    /*
     char buff[4] = "wfi";
     moyenne_datas(buff, nb_lancement, cwd);
     sprintf(buff, "wfe");
     moyenne_datas(buff, nb_lancement, cwd);
-
+    */
     printf("Transformation en graphe...\n");
 
     // graphisation
-    int ret = system("python3 cpu_graphs.py");
+    char comm[64];
+    sprintf(comm, "python3 cpu_graphs.py %d %d",tps, nb_lancement);
+    int ret = system(comm);
     if (ret != 0) {
         printf("Erreur lors de l'exécution du script Python\n");
     }

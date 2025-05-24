@@ -18,7 +18,7 @@ DEP_FILES = $(OBJ_FILES:%.o=%.d)
 all: ../kernel8_wfi.img
 
 clean:
-	rm -rf $(BUILD_DIR) *.img
+	rm -rf $(BUILD_DIR) ../*.img
 
 # Compilation des fichiers C
 $(BUILD_DIR)/%_c.o: $(SRC_DIR)/%.c

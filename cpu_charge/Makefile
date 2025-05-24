@@ -6,4 +6,7 @@ clean:
 
 datas_clean:
 	rm -rf cpu_datas
-	rm .data
+
+# each lesson1_wf* has also an image cleaning label
+img_clean:
+	rm *.img
