@@ -54,7 +54,17 @@ void uart_init ( void )
 
 	put32(AUX_MU_CNTL_REG,3);               //Finally, enable transmitter and receiver
 }
-
+/**
+ * Prints a 64-bit unsigned integer in hexadecimal format over UART.
+ *
+ * This function sends the prefix "0x" followed by 16 hexadecimal digits
+ * representing the value of `num`. It processes the number from the
+ * most significant nibble (4 bits) to the least significant one.
+ *
+ * Example: uart_hex_puts(0x1234ABCD); outputs "0x000000001234ABCD"
+ *
+ * @param num The 64-bit unsigned integer to print.
+ */
 void uart_hex_puts(uint64_t num) {
     char hex_chars[] = "0123456789ABCDEF";
     uart_send_string("0x");
