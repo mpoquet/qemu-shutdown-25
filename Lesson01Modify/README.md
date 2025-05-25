@@ -1,4 +1,4 @@
-Multicore Boot Logic for Raspberry Pi 3B (QEMU)
+# Multicore Boot Logic for Raspberry Pi 3B (QEMU)
 
 This document explains the logic used to manage secondary cores (cores 1, 2, 3) in a bare-metal setup for the Raspberry Pi 3B, emulated using QEMU. The goal is to place these secondary cores into a low-power wait state using the WFI (Wait For Interrupt) instruction, and later wake them up from the kernel.
 
