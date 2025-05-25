@@ -1,35 +1,62 @@
-This document explains only the logic used to put the secondary cores (cores 1, 2, 3)
-into a low-power wait state using the WFI (Wait For Interrupt) instruction in a 
-bare-metal setup for the Raspberry Pi 3B emulated with QEMU.
+Multicore Boot Logic for Raspberry Pi 3B (QEMU)
+
+This document explains the logic used to manage secondary cores (cores 1, 2, 3) in a bare-metal setup for the Raspberry Pi 3B, emulated using QEMU. The goal is to place these secondary cores into a low-power wait state using the WFI (Wait For Interrupt) instruction, and later wake them up from the kernel.
+
 Context:
-- On boot, all ARMv8 cores start at the same entry point (_start).
-- Only core 0 (the primary core) proceeds with system initialization.
-- Other cores should be put into an idle/waiting state.
+- On real hardware, all ARMv8 cores begin execution at the same address, typically the `_start` symbol in `boot.S`.
+- However, in QEMU's emulation of the Raspberry Pi 3, **only core 0 reaches `boot.S`**.
+- Secondary cores are held in a parked state inside QEMU’s internal logic until they are explicitly released by the kernel.
+- This is why the wake-up of secondary cores is handled from within `kernel.c`, not `boot.S`.
 
 Execution Flow:
-1. Each core identifies itself using:
+1. Core 0 executes `boot.S`:
+    ```asm
     mrs x0, mpidr_el1
     and x0, x0, #0xFF
-    cbz x0, master   ; core 0 continues, others branch to an idle loop
+    cbz x0, master   // Core 0 continues; others loop (on real hardware)
+    b .              // Secondary cores stuck here if running on real hardware
+    ```
+    On QEMU, secondary cores never reach this point—they are parked internally.
 
-2. Secondary cores are awakened from core 0 via:
-    - kernel_main() calls wake_up_core(core_id, second_startup)
-    - The function address is written into a known location (0xD8)
-    - A SEV (Send Event) instruction is issued to wake them
-
-3. Code executed by secondary cores:
-    void second_startup(void) {
-        while (1) {
-            __asm__ volatile ("wfi");  // enter low-power wait loop
-        }
+2. In `kernel.c`, core 0 uses the following logic to wake up other cores:
+    ```c
+    void wake_up_core(int core_id, void (*entry_point)(void)) {
+        volatile uint64_t *core_entry_point_table = (volatile uint64_t *)0x00000000D8;
+        core_entry_point_table[core_id] = (uint64_t)entry_point;
     }
 
+    void kernel_main(void) {
+        wake_up_core(1, second_startup);
+        wake_up_core(2, second_startup);
+        wake_up_core(3, second_startup);
+
+        uart_init();
+        uart_send_string("Hello, world!\r\n");
+
+        while (1) {
+            uart_send(uart_recv());
+        }
+    }
+    ```
+
+3. Each secondary core starts from the address written into the entry point table, and runs:
+    ```c
+    void second_startup(void) {
+        while(1) __asm__ volatile ("wfi");  // Enter low-power wait state
+    }
+    ```
+
 Why use WFI?
-- Reduces power usage by halting the core until needed
-- Core stays in sleep until it receives an event (e.g., SEV)
-- Standard practice in ARM multicore systems when idle
+- `WFI` halts the processor until an interrupt is received, reducing power consumption.
+- However, it is important to note that:
+  - `WFI` **cannot be resumed with a `SEV` instruction alone**; a real interrupt must occur.
+  - This is different from QEMU’s simulated behavior for `WFE`, which is not a true emulation—it is implemented as a NOP with some special handling.
 
 Summary:
-- Secondary cores are initially stuck (e.g., in a loop)
-- Core 0 sets their entry point and sends SEV
-- Once active, second_startup() puts them into an infinite WFI loop
+- In QEMU, **only core 0 executes the assembly bootloader (`boot.S`)**.
+- Secondary cores are awakened manually from `kernel.c` by setting their entry points and using QEMU’s internal signaling mechanisms.
+- Once active, the secondary cores execute a `WFI` loop to simulate idling.
+- This approach is simplified, and inspired by the logic found in the `write_smpboot64` function in `qemu/hw/arm/raspi.c`.
+
+
+
