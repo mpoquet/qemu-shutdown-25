@@ -1,40 +1,40 @@
-# Guide d'utilisation du template `iritTemplateFunction.typ`
+# User Guide for the `iritTemplateFunction.typ` Template
 
-Ce document explique comment utiliser le template `iritTemplateFunction.typ` pour générer un document avec une mise en page standardisée.
+This document explains how to use the `iritTemplateFunction.typ` template to generate a document with standardized layout.
 
-## 1. Présentation du Template
+## 1. Template Overview
 
-Le template permet de structurer un document en définissant :
-- Les couleurs principales (bleu et orange IRIT)
-- Les auteurs et leur affichage en pied de page
-- Une en-tête avec logo et description
-- Un titre principal et un sous-titre
-- Une mise en page justifiée
-- Des sections numérotées avec des niveaux de titres
-- Une table des matières
+The template allows structuring a document by defining:
+- Main colors (IRIT blue and orange)
+- Authors and their display in the footer
+- A header with logo and description
+- A main title and a subtitle
+- Justified layout
+- Numbered sections with heading levels
+- A table of contents
 
-## 2. Utilisation
+## 2. Usage
 
-### 2.1. Importation du template
+### 2.1. Importing the Template
 
-Dans votre fichier `.typ`, commencez par importer le template :
+In your `.typ` file, start by importing the template:
 
 ```typst
 #import "iritTemplateFunction.typ": *
-```
+````
 
-### 2.2. Définition des variables
+### 2.2. Defining Variables
 
-Définissez les variables principales, notamment les auteurs et la description de l'en-tête :
+Define the main variables, notably the authors and the header description:
 
 ```typst
 #let auteur = ("clement.aldebert31@gmail.com", "laurentpolzin@gmail.com")
 #let description = "Aldebert Clément et Polzin Laurent\nÉtudiants à l'université Paul Sabatier"
 ```
 
-### 2.3. Initialisation du document
+### 2.3. Initializing the Document
 
-Appelez la fonction `project.with` pour initialiser le document avec ses paramètres :
+Call the `project.with` function to initialize the document with its parameters:
 
 ```typst
 #show: project.with(
@@ -45,25 +45,25 @@ Appelez la fonction `project.with` pour initialiser le document avec ses paramè
 )
 ```
 
-### 2.4. Ajout d'une table des matières
+### 2.4. Adding a Table of Contents
 
-Pour générer une table des matières automatique :
+To automatically generate a table of contents:
 
 ```typst
 #outline()
 ```
 
-### 2.5. Saut de page
+### 2.5. Page Break
 
-Ajoutez un saut de page si nécessaire :
+Add a page break if needed:
 
 ```typst
 #pagebreak()
 ```
 
-### 2.6. Création de sections
+### 2.6. Creating Sections
 
-Utilisez la fonction `titre` pour créer des sections avec différents niveaux :
+Use the `titre` function to create sections with different levels:
 
 ```typst
 #titre("Titre de niveau 1", 1) \
@@ -79,9 +79,7 @@ Utilisez la fonction `titre` pour créer des sections avec différents niveaux :
 #lorem(600)
 ```
 
-## 3. Résumé
+## 3. Summary
 
-En suivant ces étapes, vous pouvez générer un document bien structuré avec une mise en page cohérente et un formatage standardisé. Ce template permet une personnalisation facile des titres, auteurs, descriptions et contenus.
-
-N'hésitez pas à adapter et enrichir le modèle selon vos besoins !
+By following these steps, you can generate a well-structured document with a coherent layout and standardized formatting. This template allows easy customization of titles, authors, descriptions, and content.
 
