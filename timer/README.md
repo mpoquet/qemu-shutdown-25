@@ -8,7 +8,7 @@ This version builds on the main project described in the [Lesson01Modify README]
 
 This implementation is currently non-functional. Although we configure virtual timers on each secondary core and enable IRQs, the cores do not appear to receive interrupts. As a result, they remain stuck in their `WFI` loop. This behavior is likely due to QEMU limitations or missing platform-specific interrupt routing.
 
-For a more stable implementation, we recommend using [lesson03 from M. Poquet](https://github.com/mpoquet/raspberry-pi-os-qemu/tree/master/src/lesson03), which successfully manages secondary core wakeup and simple timers under QEMU.
+For a more stable implementation, we recommend using [lesson03 from M. Poquet](https://github.com/mpoquet/raspberry-pi-os-qemu/tree/master/src/lesson03), which successfully manages the timer.
 
 ## Objective
 
@@ -17,7 +17,6 @@ In a physical Raspberry Pi 3B, all cores boot from the same physical address. Fi
 In QEMU, only core 0 executes from `boot.S` by default. Secondary cores are idle until released with a `SEV` instruction. This version attempts to:
 
 - Assign per-core entry points via a table at address `0x000000D8`
-- Use `SEV` to release secondary cores
 - Configure a virtual timer (`CNTV`) on each secondary core
 - Enable IRQs and put each secondary core into `WFI`
 - Use the timer interrupt to wake up each core from `WFI`
@@ -114,5 +113,3 @@ boot.S: Startup assembly and core entry point routing
 kernel.c: UART initialization, core management, timer setup
 
 mini_uart.c: UART driver
-
-link.ld: Linker script (must match stack setup in assembly)
