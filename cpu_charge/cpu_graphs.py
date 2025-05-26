@@ -114,10 +114,10 @@ def to_graph(tps, nb_l):
     plt.figure(figsize=(15, 8))
     sns.set_theme(style="whitegrid", font_scale=1.5)
 
-    ax = sns.lineplot(data=df, x="Temps (s)", y="Charge des coeurs", hue="Programme", errorbar=('ci', 95))
+    ax = sns.lineplot(data=df, x="Temps (s)", y="Charge des coeurs", hue="Programme", style="Programme", dashes={"WFI": (5,5), "WFE": ""}, errorbar=('ci', 95))
     ax.set_xlabel("Temps (s)", fontsize=14)
     ax.set_ylabel("Charge des coeurs", fontsize=14)
-    ax.set_title(f"Utilisation CPU : WFE vs WFI, moyenne avec interval de confiance à 95% sur {nb_l} lancements pendants {tps} secondes.", fontsize=16)
+    ax.set_title(f"Utilisation CPU : WFE vs WFI, moyenne sur {nb_l} lancements pendant {tps} secondes. Interval de confiance à 95%", fontsize=16)
 
     ax.grid(True)
 

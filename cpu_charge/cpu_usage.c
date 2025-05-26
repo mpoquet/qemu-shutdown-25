@@ -29,7 +29,7 @@ void read_write_task_clock(char *in, char *out);
 */
 void launch_qemu(char *kernel_path, char *qemu_path, char *out, int inter) {
     char qemu_comm[1024];
-    sprintf(qemu_comm, "./qemu-system-aarch64 -M raspi3b -kernel %s -nographic -serial null -serial mon:stdio", kernel_path);
+    sprintf(qemu_comm, "qemu-system-aarch64 -M raspi3b -kernel %s -nographic -serial null -serial mon:stdio", kernel_path);
     char perf_stat_comm[512];
     sprintf(perf_stat_comm, "perf stat -I %d -o %s", inter, out);
 
@@ -50,7 +50,7 @@ void launch_qemu(char *kernel_path, char *qemu_path, char *out, int inter) {
     // etre sur que le pere ne me tue pas avant d'avoir mesuré jusqu'au bout
     // perf stat -p fonctionnait moins bien que perf stat ./qemu
 
-    chdir(qemu_path);
+    //chdir(qemu_path);
     execvp(splitted[0], splitted); // new terminal
 }
 
@@ -380,12 +380,6 @@ int main(int argc, char *argv[]) {
 
     mesureEtTransforme(tps, inter, nb_lancement, cwd);
 
-    /*
-    char buff[4] = "wfi";
-    moyenne_datas(buff, nb_lancement, cwd);
-    sprintf(buff, "wfe");
-    moyenne_datas(buff, nb_lancement, cwd);
-    */
     printf("Transformation en graphe...\n");
 
     // graphisation
