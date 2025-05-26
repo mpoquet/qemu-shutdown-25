@@ -224,9 +224,9 @@ float *tab_from_datas(char *in_file, int *leng) {
 */
 
 void mesureEtTransforme(int tps, int inter, int nb_lancement, char *cwd) {
-    char dossier[64];
+    char dossier[512];
     sprintf(dossier, "%s/cpu_datas/", cwd);
-    char command_clean[75];
+    char command_clean[1024];
     sprintf(command_clean, "rm -rf %s", dossier);
     system(command_clean);
 
@@ -234,14 +234,14 @@ void mesureEtTransforme(int tps, int inter, int nb_lancement, char *cwd) {
     sprintf(command_clean, "mkdir %s", dossier);
     system(command_clean);
     
-    char name_total_wfi[128];
-    char name_total_wfe[128];
-    char name_wfi_filtered_task_clock[128];
-    char name_wfe_filtered_task_clock[128];
+    char name_total_wfi[1024];
+    char name_total_wfe[1024];
+    char name_wfi_filtered_task_clock[1024];
+    char name_wfe_filtered_task_clock[1024];
 
-    char wfi_kernel_path[256];
+    char wfi_kernel_path[512];
     sprintf(wfi_kernel_path, "%s/kernel8_wfi.img", cwd);
-    char wfe_kernel_path[256];
+    char wfe_kernel_path[512];
     sprintf(wfe_kernel_path, "%s/kernel8_wfe.img", cwd);
 
     for (int i = 0 ; i < nb_lancement ; ++i) {
@@ -279,7 +279,7 @@ void moyenne_datas(char *who, int nb_lancement, char *datas_path) {
     int lengths[nb_lancement];
     float *tab_total = NULL;
 
-    char name_filtered_task_clock[128];
+    char name_filtered_task_clock[256];
 
     float **tabs = malloc(sizeof(float *) * nb_lancement);
 
@@ -375,7 +375,7 @@ int main(int argc, char *argv[]) {
     // laissons tourner ce programme 10 secondes et nous obtiendrons 100 données.
     pipe(pipefd); // communication entre pere et fils pour synchronisation de la mesure
     
-    char cwd[1024];
+    char cwd[256];
     getcwd(cwd, sizeof(cwd));
 
     mesureEtTransforme(tps, inter, nb_lancement, cwd);
