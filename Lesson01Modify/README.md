@@ -58,5 +58,7 @@ Summary:
 - Once active, the secondary cores execute a `WFI` loop to simulate idling.
 - This approach is simplified, and inspired by the logic found in the `write_smpboot64` function in `qemu/hw/arm/raspi.c`.
 
+Integration Instructions for Multicore Wake-Up Support:
+To integrate this multicore boot logic into your own project, you simply need to add the two provided functions (`wake_up_core` and `second_startup`) to your `kernel.c`, simplify the `boot.S` file from your current lesson to only handle core 0, wake the secondary cores from `kernel_main`, and then compile and run your project as usual.
 
 
