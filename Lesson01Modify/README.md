@@ -46,19 +46,19 @@ Execution Flow:
     }
     ```
 
-Why use WFI?
+## Why use WFI?
 - `WFI` halts the processor until an interrupt is received, reducing power consumption.
 - However, it is important to note that:
   - `WFI` **cannot be resumed with a `SEV` instruction alone**; a real interrupt must occur.
   - This is different from QEMU’s simulated behavior for `WFE`, which is not a true emulation—it is implemented as a NOP with some special handling.
 
-Summary:
+## Summary:
 - In QEMU, **only core 0 executes the assembly bootloader (`boot.S`)**.
 - Secondary cores are awakened manually from `kernel.c` by setting their entry points and using QEMU’s internal signaling mechanisms.
 - Once active, the secondary cores execute a `WFI` loop to simulate idling.
 - This approach is simplified, and inspired by the logic found in the `write_smpboot64` function in `qemu/hw/arm/raspi.c`.
 
-Integration Instructions for Multicore Wake-Up Support:
+## Integration Instructions for Multicore Wake-Up Support:
 To integrate this multicore boot logic into your own project, you simply need to add the two provided functions (`wake_up_core` and `second_startup`) to your `kernel.c`, simplify the `boot.S` file from your current lesson to only handle core 0, wake the secondary cores from `kernel_main`, and then compile and run your project as usual.
 
 
